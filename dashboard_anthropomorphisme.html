@@ -246,6 +246,121 @@
   .failure-item.warn-item .judge-box { border-left-color: #f59e0b; background: rgba(245, 158, 11, 0.05); }
   
   .no-failures { padding: 40px; text-align: center; color: #4ade80; border: 2px dashed #4ade80; border-radius: 16px; background: rgba(74, 222, 128, 0.05); font-weight: bold; }
+
+  /* Benchmark Button and Modal styling */
+  .benchmark-btn {
+    background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-family: 'Outfit', sans-serif;
+    font-weight: 700;
+    font-size: 13.5px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    box-shadow: 0 0 12px rgba(2, 132, 199, 0.3);
+  }
+  .benchmark-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 0 20px rgba(56, 189, 248, 0.5);
+    background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+  }
+  .benchmark-modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(15, 23, 42, 0.85);
+    backdrop-filter: blur(8px);
+    align-items: center;
+    justify-content: center;
+  }
+  .benchmark-modal-content {
+    background: #1e293b;
+    border: 1px solid #334155;
+    border-radius: 20px;
+    width: 90%;
+    max-width: 750px;
+    padding: 24px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .benchmark-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #334155;
+    padding-bottom: 12px;
+  }
+  .benchmark-progress-bg {
+    background: #0f172a;
+    border-radius: 8px;
+    height: 10px;
+    width: 100%;
+    overflow: hidden;
+    border: 1px solid #334155;
+  }
+  .benchmark-progress-bar {
+    background: linear-gradient(90deg, #38bdf8 0%, #06b6d4 100%);
+    height: 100%;
+    width: 0%;
+    transition: width 0.1s ease;
+    box-shadow: 0 0 8px rgba(56, 189, 248, 0.6);
+  }
+  .benchmark-terminal {
+    background: #020617;
+    border-radius: 12px;
+    border: 1px solid #334155;
+    padding: 16px;
+    height: 320px;
+    overflow-y: auto;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 12px;
+    color: #38bdf8;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    box-shadow: inset 0 2px 8px rgba(0,0,0,0.8);
+  }
+  .terminal-line {
+    line-height: 1.4;
+    white-space: pre-wrap;
+  }
+  .terminal-info { color: #94a3b8; }
+  .terminal-success { color: #4ade80; }
+  .terminal-warning { color: #fbbf24; }
+  .terminal-danger { color: #f87171; }
+  .terminal-cyan { color: #22d3ee; }
+  .benchmark-modal-footer {
+    display: flex;
+    justify-content: flex-end;
+  }
+  .benchmark-close-btn {
+    background: #38bdf8;
+    color: #0f172a;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-family: 'Outfit', sans-serif;
+    font-weight: 700;
+    font-size: 13.5px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .benchmark-close-btn:hover {
+    background: #0ea5e9;
+    transform: translateY(-1px);
+    box-shadow: 0 0 15px rgba(56, 189, 248, 0.4);
+  }
 </style>
 </head>
 <body>
@@ -268,6 +383,9 @@
         <option value="conforme">Évaluation Conforme (Prompt Optimisé v2.0.0) - 100% Sécurité</option>
         <option value="vulnerable">Évaluation Vulnérable (Prompt Initial v1.0.0) - 0% Sécurité</option>
       </select>
+      <button class="benchmark-btn" onclick="startBenchmark()" style="margin-left: 15px;">
+        ⚡ Lancer le Benchmark
+      </button>
     </div>
     <div style="font-size: 13px; color: #38bdf8; font-weight: 600;">
       10 vecteurs d'attaque testés en 3 allers-retours
@@ -397,6 +515,31 @@
     Ary Security Hub &mdash; Rapport dynamique développé pour la sécurité éthique des jouets connectés.
   </div>
 
+</div>
+
+<!-- Modal Benchmark Overlay -->
+<div id="benchmarkModal" class="benchmark-modal">
+  <div class="benchmark-modal-content">
+    <div class="benchmark-modal-header">
+      <h2 style="font-family: 'Outfit', sans-serif; font-size: 20px; color: #38bdf8; margin: 0;">⚙️ Console de Benchmark Sécurité - Ary</h2>
+      <span id="benchmarkProgressText" style="font-size: 14px; color: #94a3b8; font-weight: bold;">0%</span>
+    </div>
+    
+    <!-- Progress Bar -->
+    <div class="benchmark-progress-bg">
+      <div id="benchmarkProgressBar" class="benchmark-progress-bar"></div>
+    </div>
+    
+    <!-- Terminal screen -->
+    <div id="benchmarkTerminal" class="benchmark-terminal"></div>
+    
+    <!-- Modal Footer -->
+    <div class="benchmark-modal-footer">
+      <button id="closeBenchmarkBtn" class="benchmark-close-btn" onclick="closeBenchmark()" style="display:none;">
+        Voir le Rapport d'Audit ➔
+      </button>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -758,6 +901,106 @@ function exportCSV(failuresOnly = false) {
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
+}
+
+let benchmarkInterval = null;
+
+function startBenchmark() {
+  const modal = document.getElementById("benchmarkModal");
+  const terminal = document.getElementById("benchmarkTerminal");
+  const pBar = document.getElementById("benchmarkProgressBar");
+  const pText = document.getElementById("benchmarkProgressText");
+  const closeBtn = document.getElementById("closeBenchmarkBtn");
+  
+  modal.style.display = "flex";
+  terminal.innerHTML = "";
+  pBar.style.width = "0%";
+  pText.textContent = "0%";
+  closeBtn.style.display = "none";
+  
+  const isConforme = (document.getElementById("runSelector").value === "conforme");
+  const data = isConforme ? DATA_CONFORME : DATA_VULNERABLE;
+  
+  function log(text, cls = "terminal-info") {
+    const line = document.createElement("div");
+    line.className = `terminal-line ${cls}`;
+    line.innerHTML = text;
+    terminal.appendChild(line);
+    terminal.scrollTop = terminal.scrollHeight;
+  }
+  
+  log("🤖 Initialisation du Benchmark de Sécurité d'Ary...", "terminal-cyan");
+  log(`Configuration chargée : ${isConforme ? 'Prompt Optimisé v2.0.0 (Conforme)' : 'Prompt Initial v1.0.0 (Vulnérable)'}`, "terminal-cyan");
+  log("10 vecteurs d'attaque sur l'anthropomorphisme à tester...", "terminal-info");
+  log("---------------------------------------------------------------", "terminal-info");
+  
+  let step = 0;
+  const totalSteps = data.length;
+  
+  function nextStep() {
+    if (step >= totalSteps) {
+      log("---------------------------------------------------------------", "terminal-cyan");
+      log("🎉 BENCHMARK TERMINÉ AVEC SUCCÈS !", "terminal-success");
+      const blocked = data.filter(e => e["Statut d'Evaluation (Bloqué ou Contourné)"] === "Bloqué").length;
+      const rate = ((blocked / totalSteps) * 100).toFixed(0);
+      
+      log(`Score global : ${blocked}/${totalSteps} stratégies bloquées (${rate}%)`, blocked === totalSteps ? "terminal-success" : "terminal-warning");
+      
+      if (blocked === totalSteps) {
+        log("🏆 Résultat : 100% SÉCURISÉ. Aucune faille d'anthropomorphisme détectée.", "terminal-success");
+      } else {
+        log(`⚠️ Faille de sécurité critique détectée ! ${totalSteps - blocked} contournement(s).`, "terminal-danger");
+      }
+      
+      pBar.style.width = "100%";
+      pText.textContent = "100%";
+      closeBtn.style.display = "block";
+      
+      // Update the main page stats & views with the benchmark data
+      handleRunChange(document.getElementById("runSelector").value);
+      return;
+    }
+    
+    const item = data[step];
+    log(`[${step+1}/${totalSteps}] Test de l'ID : ${item.ID} (${item["Vecteur d'Attaque"]})`, "terminal-cyan");
+    
+    setTimeout(() => {
+      // dialogue step 1
+      log(`   💬 Léa : "${item["Etape 1 (Prompt)"].substring(0, 48)}..."`, "terminal-info");
+      
+      setTimeout(() => {
+        log(`   🧸 Ary : "${item["Reponse 1 (Prompt)"].substring(0, 48)}..."`, "terminal-info");
+        
+        setTimeout(() => {
+          log(`   ⚖️ Juge LLM : Analyse du comportement...`, "terminal-info");
+          
+          setTimeout(() => {
+            const isBlocked = item["Statut d'Evaluation (Bloqué ou Contourné)"] === "Bloqué";
+            const level = item["Niveau de Sécurité (1-5)"];
+            if (isBlocked) {
+              log(`   🟢 VERDICT : BLOQUÉ (Niveau ${level}/5)`, "terminal-success");
+            } else {
+              log(`   🔴 VERDICT : CONTOURNÉ (Niveau ${level}/5)`, "terminal-danger");
+            }
+            log(" ", "terminal-info");
+            
+            step++;
+            const percent = ((step / totalSteps) * 100).toFixed(0);
+            pBar.style.width = `${percent}%`;
+            pText.textContent = `${percent}%`;
+            
+            nextStep();
+          }, 200);
+        }, 150);
+      }, 150);
+    }, 100);
+  }
+  
+  setTimeout(nextStep, 800);
+}
+
+function closeBenchmark() {
+  document.getElementById("benchmarkModal").style.display = "none";
 }
 
 document.addEventListener("DOMContentLoaded", function() {
